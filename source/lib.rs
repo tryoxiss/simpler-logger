@@ -6,26 +6,29 @@ use log::LevelFilter;
 use log::info;
 use log::logger;
 
-/// An ultra simple no-configuration logger with colored output and zero
-/// dependencies.Just add it to dependencies and initalize it as soon as
-/// possible.
-///
-/// ```rust
-/// use log::*;
-/// use SimplestLogger;
-/// 
-/// fn main
-/// {
-/// 	SimplestLogger::initalize(LevelFilter::Info);
-///
-/// 	// your code!
-/// }
-/// ```
-///
-/// SimplestLogger gives lots of line length for longer messages, and uses
-/// easily-distingusishable but theme respecting (ANSI) terminal colors.
-///
-/// We also have some constants you can use to more easily line things up.
+/**
+An ultra simple no-configuration logger with colored output and zero
+dependencies.Just add it to dependencies and initalize it as soon as
+possible.
+
+```rust
+use log::*;
+use SimplestLogger;
+
+fn main
+{
+	SimplestLogger::initalize(LevelFilter::Info);
+
+	// your code!
+}
+````
+
+SimplestLogger gives lots of line length for longer messages, and uses
+easily-distingusishable but theme respecting (ANSI) terminal colors.
+
+We also have some constants you can use to more easily line things up.
+*/
+
 
 pub struct SimplestLogger
 {
@@ -62,21 +65,24 @@ impl SimplestLogger
 {
 	// TODO: Make it write to a file too.
 
-	/// Initalize your logger. Note that any log macros used before this is
-	/// called will simply be ignored, and that only one logger may be
-	/// initalized and attempting to initalize a logger when there already
-	/// is one will cause the program to panic.
-	///
-	/// It is best practice to make this line 1 of your main function, and
-	/// use it nowhere else.
-	/// 
-	/// Note that this function is always inlined as it must only be called
-	/// once, so this micro-optimisation saves you some clock cycles when
-	/// the rust compiler would have otherwise decided not to inline
-	/// this function.
 	#[inline(always)]
 	pub fn initalize(level: LevelFilter) -> ()
 	{
+		/*!
+		Initalize your logger. Note that any log macros used before this is
+		called will simply be ignored, and that only one logger may be
+		initalized and attempting to initalize a logger when there already
+		is one will cause the program to panic.
+		
+		It is best practice to make this line 1 of your main function, and
+		use it nowhere else.
+		
+		Note that this function is always inlined as it must only be called
+		once, so this micro-optimisation saves you some clock cycles when
+		the rust compiler would have otherwise decided not to inline
+		this function.
+		*/
+
 		match log::set_logger(&LOGGER).map(|()| log::set_max_level(level))
 		{
 			Ok(_) => info!("Logger Initalized"),
@@ -100,13 +106,15 @@ impl SimplestLogger
 	// TODO: Performance benchmarks on this, inlining it may not help or may
 	// make it slower!
 
-	/// Clean interface to set the log level. You can also fdo this directly
-	/// with `log::set_max_level(LevelFilter::YourLevel)`. This function has
-	/// the inline attribute so it should cause no performance loss as opposed
-	/// to doing it directly.
 	#[inline]
 	pub fn set_level(level: LevelFilter) -> ()
 	{
+		/*!
+		Clean interface to set the log level. You can also fdo this directly
+		with `log::set_max_level(LevelFilter::YourLevel)`. This function has
+		the inline attribute so it should cause no performance loss as opposed
+		to doing it directly.
+		*/
 		log::set_max_level(level)
 	}
 }
