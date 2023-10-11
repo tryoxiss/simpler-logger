@@ -1,12 +1,4 @@
-use log::Record;
-use log::Level;
-use log::Metadata;
-use log::SetLoggerError;
-use log::LevelFilter;
-use log::info;
-use log::logger;
-
-/**
+/*!
 An ultra simple no-configuration logger with colored output and zero
 dependencies.Just add it to dependencies and initalize it as soon as
 possible.
@@ -29,6 +21,13 @@ easily-distingusishable but theme respecting (ANSI) terminal colors.
 We also have some constants you can use to more easily line things up.
 */
 
+use log::Record;
+use log::Level;
+use log::Metadata;
+use log::SetLoggerError;
+use log::LevelFilter;
+use log::info;
+use log::logger;
 
 pub struct SimplestLogger
 {
@@ -75,7 +74,8 @@ impl SimplestLogger
 		is one will cause the program to panic.
 		
 		It is best practice to make this line 1 of your main function, and
-		use it nowhere else.
+		use it nowhere else so it is easy to know which cases need to be
+		removed.
 		
 		Note that this function is always inlined as it must only be called
 		once, so this micro-optimisation saves you some clock cycles when
@@ -137,11 +137,11 @@ impl log::Log for SimplestLogger {
 		match record.level()
 		{
 			// this only adds one space of padding giving you more length in the line.
-			Level::Trace => println!(" {BOLD}Trace{RESET} {}", record.args()),
-			Level::Debug => println!(" {BOLD}{DEBUG_COLOR}Debug{RESET} {}", record.args()),
-			Level::Info => println!("  {BOLD}{INFO_COLOR}Info{RESET} {}", record.args()),
-			Level::Warn => println!("  {BOLD}{WARNING_COLOR}Warn{RESET} {}", record.args()),
-			Level::Error => println!(" {BOLD}{ERROR_COLOR}Error{RESET} {}", record.args()),
+			Level::Trace => println!("  {BOLD}Trace{RESET} {}", record.args()),
+			Level::Debug => println!("  {BOLD}{DEBUG_COLOR}Debug{RESET} {}", record.args()),
+			Level::Info => println!("   {BOLD}{INFO_COLOR}Info{RESET} {}", record.args()),
+			Level::Warn => println!("{BOLD}{WARNING_COLOR}Warning{RESET} {}", record.args()),
+			Level::Error => println!("  {BOLD}{ERROR_COLOR}Error{RESET} {}", record.args()),
 
 			// This lines it up with cargos messages, if you prefer.
 			// Level::Trace => println!("       {BOLD}Trace{RESET} {}", record.args()),
