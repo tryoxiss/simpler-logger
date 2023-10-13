@@ -46,7 +46,7 @@ pub struct SimplestLogger
 //
 // source: https://stackoverflow.com/questions/52751597/what-is-the-difference-between-a-constant-and-a-static-variable-and-which-should
 
-pub const INDENT: &str = "       ";
+pub const INDENT: &str = "        ";
 
 const BOLD: &str = "\x1b[1m";
 const RESET: &str = "\x1b[0m";
@@ -58,7 +58,7 @@ const WARNING_COLOR: &str = "\x1b[93m";
 
 // I hate this but this is just the minimum level it will log! If you pass a higher value,
 // say info, then trace and debug will still be excluded.
-const LOGGER: SimplestLogger = SimplestLogger { level: Level::Trace };
+// const LOGGER: SimplestLogger = SimplestLogger { level: Level::Trace };
 
 impl SimplestLogger
 {
@@ -83,7 +83,7 @@ impl SimplestLogger
 		this function.
 		*/
 
-		match log::set_logger(&LOGGER).map(|()| log::set_max_level(level))
+		match log::set_logger(&SimplestLogger { level: Level::Trace }).map(|()| log::set_max_level(level))
 		{
 			Ok(_) => info!("Logger Initalized"),
 			Err(_) =>
@@ -119,9 +119,9 @@ impl SimplestLogger
 	}
 }
 
-// Hide implementation details, they don't matter. Peop[le can just view the source if they are curious.
 #[doc(hidden)]
 impl log::Log for SimplestLogger {
+	#[cold]
 	fn enabled(&self, metadata: &Metadata) -> bool
 	{
 		return metadata.level() <= self.level;
@@ -129,39 +129,65 @@ impl log::Log for SimplestLogger {
 
 	fn log(&self, record: &Record)
 	{
-		if !self.enabled(record.metadata())
+
+
+		// if !self.enabled(record.metadata())
+		// {
+		// 	return;
+		// }
+
+		// skip function call to self.enabled(), probably saves a few clock
+		// cycles since we skip an extra function call of record.metadata().
+		// Old code preserved above just incase.
+		if !(record.level() <= self.level)
 		{
 			return;
 		}
 
 		match record.level()
 		{
-			// this only adds one space of padding giving you more length in the line.
-			Level::Trace => println!("  {BOLD}Trace{RESET} {}", record.args()),
+			Level::Trace => println!("  {BOLD}Trace{RESET} {name} ({file}:{line})",
+				name = record.args(),
+				file = record.file().unwrap_or("unknown"),
+				line = record.line().unwrap_or(0),
+			),
 			Level::Debug => println!("  {BOLD}{DEBUG_COLOR}Debug{RESET} {}", record.args()),
 			Level::Info => println!("   {BOLD}{INFO_COLOR}Info{RESET} {}", record.args()),
-			Level::Warn => println!("{BOLD}{WARNING_COLOR}Warning{RESET} {}", record.args()),
-			Level::Error => println!("  {BOLD}{ERROR_COLOR}Error{RESET} {}", record.args()),
-
-			// This lines it up with cargos messages, if you prefer.
-			// Level::Trace => println!("       {BOLD}Trace{RESET} {}", record.args()),
-			// Level::Debug => println!("       {BOLD}{DEBUG_COLOR}Debug{RESET} {}", record.args()),
-			// Level::Info => println!("        {BOLD}{INFO_COLOR}Info{RESET} {}", record.args()),
-			// Level::Warn => println!("        {BOLD}{WARNING_COLOR}Warn{RESET} {}", record.args()),
-			// Level::Error => println!("       {BOLD}{ERROR_COLOR}Error{RESET} {}", record.args()),
+			Level::Warn => println!("{BOLD}{WARNING_COLOR}Warning{RESET} {} ({file}:{line})",
+				record.args(),
+				file = record.file().unwrap_or("unknown"),
+				line = record.line().unwrap_or(0),
+			),
+			Level::Error => println!("  {BOLD}{ERROR_COLOR}Error{RESET} {} ({file}:{line})",
+				record.args(),
+				file = record.file().unwrap_or("unknown"),
+				line = record.line().unwrap_or(0),
+			),
 		}
 	}
 
 	fn flush(&self) {}
 }
 
-// #[cfg(test)]
-// mod tests {
-//	 use super::*;
 
-//	 #[test]
-//	 fn it_works() {
-//		 let result = add(2, 2);
-//		 assert_eq!(result, 4);
-//	 }
-// }
+#[cfg(test)]
+mod tests
+{
+	use super::*;
+
+	#[test]
+	fn change_level_with_set_level()
+	{
+		SimplestLogger::initalize(LevelFilter::Info);
+		SimplestLogger::set_level(LevelFilter::Debug);
+		todo!("Assertions!");
+	}
+
+	#[test]
+	#[should_panic]
+	fn panic_on_logger_exist()
+	{
+		SimplestLogger::initalize(LevelFilter::Info);
+		SimplestLogger::initalize(LevelFilter::Debug)
+	}
+}

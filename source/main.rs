@@ -37,14 +37,18 @@ fn main()
 	println!("-----");
 	info!("Meow and meow and meow
 {INDENT}and meow");
+
+	SimplestLogger::set_level(LevelFilter::Trace);
+
+	trace!("finds exact locations, should always be ommitted from final \n{INDENT}binaries. With out logger, automatically includes file \n{INDENT}path and line number.");
+	debug!("Debug message, should never appear in a final binary. No location \n{INDENT}included, use trace for that.");
+	info!("Confirmations that the program is working as expected. \n{INDENT}No location needed.");
+	warn!("Something might go wrong or should be brought to your attention. \n{INDENT}Location included.");
+	error!("Something went wrong, but could be reovered from. \n{INDENT}Location included.");
 }
 
 fn test()
 {
-	static mut CAT: &str = "meow";
-
-	unsafe { CAT = "purr"; }
-
 	SimplestLogger::set_level(LevelFilter::Info);
 	trace!("Traced");
 	debug!("Bugs removed");
