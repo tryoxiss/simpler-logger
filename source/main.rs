@@ -1,8 +1,12 @@
+// #![feature(test)]
 mod lib;
 
 use log::*;
 use lib::SimplestLogger;
 use lib::INDENT;
+
+// extern crate test;
+// use test;
 
 fn main()
 {

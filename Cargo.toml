@@ -22,3 +22,6 @@ path = "source/main.rs"
 
 [dependencies]
 log = "0.4.20"
+
+# [dev-dependencies]
+# test = "0.1.0" # I don't know what version but this works

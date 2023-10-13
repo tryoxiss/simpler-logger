@@ -19,20 +19,30 @@ SimplestLogger gives lots of line length for longer messages, and uses
 easily-distingusishable but theme respecting (ANSI) terminal colors.
 
 We also have some constants you can use to more easily line things up.
+
+In your Cargo.toml you will need:
+```toml
+log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
+```
+
+Those feature flags aren't really "features", what they do is allows all logs
+in debug, but tells the rust compiler to remove any and all `trace!` and
+`debug!` macros invocations at *compile time*, meaning you have exactly zero
+overhead or performance loss for those macros: only info, warning, and error
+have any processing power required in production.
+
+In fact, if you want you can even do `release_max_level_off` and get no cost
+for *any* logs in production! Useful for embedded systems and tight storage
+constraints--since you can omit the entire log and SimplestLogger crates.
 */
 
 use log::Record;
 use log::Level;
 use log::Metadata;
-use log::SetLoggerError;
 use log::LevelFilter;
 use log::info;
-use log::logger;
 
-pub struct SimplestLogger
-{
-    level: Level,
-}
+pub struct SimplestLogger;
 
 // You probably already know this but a lot of devs don't know `static` v. `const`. Basically.
 //
@@ -83,7 +93,7 @@ impl SimplestLogger
 		this function.
 		*/
 
-		match log::set_logger(&SimplestLogger { level: Level::Trace }).map(|()| log::set_max_level(level))
+		match log::set_logger(&SimplestLogger).map(|()| log::set_max_level(level))
 		{
 			Ok(_) => info!("Logger Initalized"),
 			Err(_) =>
@@ -121,29 +131,17 @@ impl SimplestLogger
 
 #[doc(hidden)]
 impl log::Log for SimplestLogger {
-	#[cold]
+	#[cold] #[inline(always)]
 	fn enabled(&self, metadata: &Metadata) -> bool
 	{
-		return metadata.level() <= self.level;
+		return metadata.level() <= Level::Trace;
 	}
 
 	fn log(&self, record: &Record)
 	{
-
-
-		// if !self.enabled(record.metadata())
-		// {
-		// 	return;
-		// }
-
-		// skip function call to self.enabled(), probably saves a few clock
-		// cycles since we skip an extra function call of record.metadata().
-		// Old code preserved above just incase.
-		if !(record.level() <= self.level)
-		{
-			return;
-		}
-
+		// we don't need to check if its enabled since that is handled with the
+		// LevelFilter system, which is better for performance since it must
+		// necesarly go through that anyway.
 		match record.level()
 		{
 			Level::Trace => println!("  {BOLD}Trace{RESET} {name} ({file}:{line})",
@@ -164,6 +162,9 @@ impl log::Log for SimplestLogger {
 				line = record.line().unwrap_or(0),
 			),
 		}
+
+		// I believe everything in this entire function asside from the match
+		// is inlined, meaning this is as fast as it can realistically get.
 	}
 
 	fn flush(&self) {}
@@ -183,8 +184,7 @@ mod tests
 		todo!("Assertions!");
 	}
 
-	#[test]
-	#[should_panic]
+	#[test] #[should_panic]
 	fn panic_on_logger_exist()
 	{
 		SimplestLogger::initalize(LevelFilter::Info);
