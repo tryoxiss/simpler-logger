@@ -66,10 +66,6 @@ const INFO_COLOR: &str = "\x1b[96m";
 const ERROR_COLOR: &str = "\x1b[91m";
 const WARNING_COLOR: &str = "\x1b[93m";
 
-// I hate this but this is just the minimum level it will log! If you pass a higher value,
-// say info, then trace and debug will still be excluded.
-// const LOGGER: SimplestLogger = SimplestLogger { level: Level::Trace };
-
 impl SimplestLogger
 {
 	// TODO: Make it write to a file too.
