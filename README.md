@@ -1,5 +1,8 @@
 # SimplestLogger
 
+> **Important**
+> We have migrated this repository to [codeberg](https://codeberg.org/tryoxiss/simplest-logger) due to github using public repos as AI training data. This repository will be completely purged at some point.
+
 Inspired by SimpleLogger, this is a crate for ultra-simple logging. I created it because there were no crates that focused on being ultra lightweight and no-effort to use.
 
 ## Roadmap
